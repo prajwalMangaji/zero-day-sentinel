@@ -1,1 +1,1 @@
-web: gunicorn blockchain_server:app --bind 0.0.0.0:$PORT
+web: waitress-serve --port=5000 blockchain_server:app
