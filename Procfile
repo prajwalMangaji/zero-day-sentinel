@@ -1,1 +1,1 @@
-web: gunicorn blockchain_server:app --workers 4 --threads 4 --bind 0.0.0.0:5000
+web: waitress-serve --port=5000 blockchain_server:app
