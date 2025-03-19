@@ -1,0 +1,10 @@
+services:
+  - name: blockchain-server
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+    startCommand: |
+      waitress-serve --port $PORT blockchain_server:app
+    envVars:
+      - key: PORT
+        value: 10000
