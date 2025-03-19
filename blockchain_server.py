@@ -157,7 +157,7 @@ def add_threat():
         "destination_port": 443,
         "protocol": "tcp",
         "flag": "REJ"
-      }
+        }
     }
     """
     threat_data = request.get_json()
@@ -207,6 +207,13 @@ def verify():
 # ------------------------------
 # Main Execution
 # ------------------------------
+
+@app.route("/reset", methods=["POST"])
+def reset_blockchain():
+    global blockchain
+    blockchain = Blockchain()  # Reinitialize the blockchain in memory
+    return jsonify({"message": "Blockchain reset successfully!", "chain": [b.to_dict() for b in blockchain.chain]})
+
 
 
 if __name__ == "__main__":
