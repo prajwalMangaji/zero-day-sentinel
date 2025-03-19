@@ -173,22 +173,61 @@ def get_chain():
 @app.route("/threat", methods=["POST"])
 def add_threat():
     """
-    Receives threat data from the ML model (or for demo, from manual POST requests).
-    Expected JSON format:
+    Receives threat data from the ML model or manual POST requests.
+    Example format:
     {
-        "type": "suspicious_login",
-        "details": {"ip": "192.168.1.10", "message": "Unusual login activity"}
+      "id": "threat-1742364492669-vk8go90b5",
+      "timestamp": "2025-03-19 11:36:53",
+      "ip": "192.168.1.86",
+      "attack_type": "Connection Attempt",
+      "severity": "High",
+      "status": "Detected",
+      "details": {
+        "user_agent": "Zomato Anomaly Detector/1.0",
+        "method": "GET",
+        "url_path": "/private",
+        "source_port": 52949,
+        "destination_port": 443,
+        "protocol": "tcp",
+        "flag": "REJ"
+      }
     }
     """
     threat_data = request.get_json()
+
+    # Validate the threat data format
     if not threat_data:
         return jsonify({"error": "Invalid threat data"}), 400
 
-    added = blockchain.add_block(threat_data)
+    # Standardized format for all new blocks
+    block_data = {
+        "id": threat_data.get("id", f"threat-{datetime.now().timestamp()}"),
+        "timestamp": threat_data.get("timestamp", datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")),
+        "ip": threat_data.get("ip", "0.0.0.0"),
+        "attack_type": threat_data.get("attack_type", "unknown"),
+        "severity": threat_data.get("severity", "Low"),
+        "status": threat_data.get("status", "Unknown"),
+        "details": {
+            "user_agent": threat_data.get("details", {}).get("user_agent", "N/A"),
+            "method": threat_data.get("details", {}).get("method", "N/A"),
+            "url_path": threat_data.get("details", {}).get("url_path", "/"),
+            "source_port": threat_data.get("details", {}).get("source_port", 0),
+            "destination_port": threat_data.get("details", {}).get("destination_port", 0),
+            "protocol": threat_data.get("details", {}).get("protocol", "N/A"),
+            "flag": threat_data.get("details", {}).get("flag", "N/A")
+        }
+    }
+
+    # Add the threat as a block
+    added = blockchain.add_block(block_data)
+    
     if not added:
         return jsonify({"message": "Duplicate threat data, block not added"}), 409
 
-    return jsonify({"message": "Threat added successfully!", "new_block": blockchain.chain[-1].to_dict()})
+    return jsonify({
+        "message": "Threat added successfully!",
+        "new_block": blockchain.chain[-1].to_dict()
+    })
 
 @app.route("/verify", methods=["GET"])
 def verify():
