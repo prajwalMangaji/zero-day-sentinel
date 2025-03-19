@@ -74,45 +74,12 @@ class Blockchain:
         return True
 
     def save_chain(self):
-        data = {
-            "version": self.VERSION,
-            "chain": [b.to_dict() for b in self.chain]
-        }
-        with open(self.FILE_NAME, "w") as f:
-            json.dump(data, f, indent=4, sort_keys=True)
+    # Disabled for in-memory storage
+        pass
 
     def load_chain(self):
-        try:
-            with open(self.FILE_NAME, "r") as f:
-                file_data = json.load(f)
-
-                if isinstance(file_data, list):
-                    print("🚨 Blockchain file in old format (list). Resetting to genesis block.")
-                    return None
-
-                file_version = file_data.get("version", "0.0")
-                if file_version != self.VERSION:
-                    print(f"🚨 Incompatible version {file_version}. Resetting blockchain.")
-                    return None
-
-                data = file_data["chain"]
-                chain = []
-                for i, block in enumerate(data):
-                    data_hash = block.get("data_hash", hashlib.sha256(json.dumps(block["data"], sort_keys=True).encode()).hexdigest())
-                    b = Block(block["data"], block["previous_hash"], block["timestamp"], block["data_hash"], block["hash"])
-                    if Block.calculate_hash(b.data_hash, b.previous_hash, b.timestamp) != block["hash"]:
-                        print(f"🚨 Tampering detected at block {i}! Recovering up to block {i-1}.")
-                        return chain[:i] if i > 0 else [Blockchain.create_genesis_block()]
-                    chain.append(b)
-                return chain
-        except FileNotFoundError:
-            return None
-        except json.JSONDecodeError:
-            print("🚨 Corrupted blockchain file! Resetting to genesis block.")
-            return [self.create_genesis_block()]
-        except KeyError as e:
-            print(f"🚨 Invalid blockchain file format (missing key: {e})! Resetting blockchain.")
-            return None
+    # Disabled file-based persistence; always start with a fresh blockchain in memory.
+        return None
 
     def verify_chain(self):
         with open("blockchain.json", "r") as file:
@@ -176,13 +143,13 @@ def add_threat():
     Receives threat data from the ML model or manual POST requests.
     Example format:
     {
-      "id": "threat-1742364492669-vk8go90b5",
-      "timestamp": "2025-03-19 11:36:53",
-      "ip": "192.168.1.86",
-      "attack_type": "Connection Attempt",
-      "severity": "High",
-      "status": "Detected",
-      "details": {
+        "id": "threat-1742364492669-vk8go90b5",
+        "timestamp": "2025-03-19 11:36:53",
+        "ip": "192.168.1.86",
+        "attack_type": "Connection Attempt",
+        "severity": "High",
+        "status": "Detected",
+        "details": {
         "user_agent": "Zomato Anomaly Detector/1.0",
         "method": "GET",
         "url_path": "/private",
