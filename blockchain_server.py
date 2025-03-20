@@ -9,6 +9,14 @@ from datetime import datetime, timezone
 # Blockchain Code
 # ------------------------------
 
+import hashlib
+import json
+from datetime import datetime, timezone
+
+import hashlib
+import json
+from datetime import datetime, timezone
+
 class Block:
     def __init__(self, data, previous_hash, timestamp=None, data_hash=None, block_hash=None):
         self.data = data
@@ -66,11 +74,11 @@ class Blockchain:
         return True
 
     def save_chain(self):
-        # Disabled for in-memory storage
+    # Disabled for in-memory storage
         pass
 
     def load_chain(self):
-        # Disabled file-based persistence; always start with a fresh blockchain in memory.
+    # Disabled file-based persistence; always start with a fresh blockchain in memory.
         return None
 
     def verify_chain(self):
@@ -127,11 +135,7 @@ blockchain = Blockchain()
 
 @app.route("/chain", methods=["GET"])
 def get_chain():
-    # Prepare data for the response
-    data = {"length": len(blockchain.chain), "chain": [b.to_dict() for b in blockchain.chain]}
-    # Convert to minified JSON (no pretty printing)
-    raw_json = json.dumps(data, separators=(',', ':'))
-    return app.response_class(raw_json, content_type='application/json')
+    return jsonify({"length": len(blockchain.chain), "chain": [b.to_dict() for b in blockchain.chain]})
 
 @app.route("/threat", methods=["POST"])
 def add_threat():
@@ -146,13 +150,13 @@ def add_threat():
         "severity": "High",
         "status": "Detected",
         "details": {
-            "user_agent": "Zomato Anomaly Detector/1.0",
-            "method": "GET",
-            "url_path": "/private",
-            "source_port": 52949,
-            "destination_port": 443,
-            "protocol": "tcp",
-            "flag": "REJ"
+        "user_agent": "Zomato Anomaly Detector/1.0",
+        "method": "GET",
+        "url_path": "/private",
+        "source_port": 52949,
+        "destination_port": 443,
+        "protocol": "tcp",
+        "flag": "REJ"
         }
     }
     """
@@ -200,11 +204,17 @@ def verify():
     else:
         return jsonify({"error": msg}), 400
 
+# ------------------------------
+# Main Execution
+# ------------------------------
+
 @app.route("/reset", methods=["POST"])
 def reset_blockchain():
     global blockchain
     blockchain = Blockchain()  # Reinitialize the blockchain in memory
     return jsonify({"message": "Blockchain reset successfully!", "chain": [b.to_dict() for b in blockchain.chain]})
+
+
 
 if __name__ == "__main__":
     # Get the port Railway assigns or default to 5000
